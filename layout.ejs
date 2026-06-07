@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NightOwl - Your Business Never Sleeps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <%- themeCSS %>
+</head>
+<body>
+  <%- include('partials/hero') %>
+  <%- include('partials/pricing') %>
+  <%- include('partials/features') %>
+  <%- include('partials/how') %>
+  <%- include('partials/closing') %>
+
+  <!-- Lead capture section — inline form below the closing -->
+  <section class="lead-section" id="contact">
+    <div class="lead-section-inner">
+      <div class="section-label">CONTACT</div>
+      <h2>Have questions<span class="gradient-text">?</span></h2>
+      <p>Not sure NightOwl is right for you? Tell us what keeps you up at night — we'll help you figure it out.</p>
+      <div id="inline-success" class="inline-success" style="display:none;">
+        <strong>&#10003; Message sent.</strong> We'll be in touch within 24 hours.
+      </div>
+      <form id="inline-lead-form" class="inline-lead-form" novalidate>
+        <div class="form-row">
+          <input type="text" name="name" placeholder="Your name" required autocomplete="name">
+          <input type="email" name="email" placeholder="Your email" required autocomplete="email">
+        </div>
+        <input type="text" name="business_name" placeholder="Business name (optional)" autocomplete="organization">
+        <textarea name="pain_point" placeholder="What's your biggest admin headache?" rows="2" maxlength="400"></textarea>
+        <div class="inline-form-error" id="inline-form-error"></div>
+        <button type="submit" class="inline-submit" id="inline-submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+  <%- include('partials/contact-form') %>
+  <%- analyticsSnippet %>
+</body>
+</html>

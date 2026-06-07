@@ -1,0 +1,4 @@
+[[crons]]
+name = "morning-briefing"
+schedule = "0 7 * * *"
+command = "node jobs/morning-briefing.js"

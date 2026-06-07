@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NightOwl — Inbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <%- themeCSS %>
+  <style>
+    /* ─── Dashboard shell ─── */
+    .dash-wrap {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--bg-subtle);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+    }
+    .sidebar-brand {
+      padding: 0 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-brand a {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--fg);
+      text-decoration: none;
+    }
+    .sidebar-brand span { color: var(--accent); }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1.25rem;
+      color: var(--fg-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      border-radius: 0;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-item:hover, .nav-item.active {
+      color: var(--fg);
+      background: rgba(245,158,11,0.08);
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 1rem; width: 20px; }
+
+    /* ─── Main area ─── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-subtle);
+    }
+    .topbar h1 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .btn {
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      border: none;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #0a0a0f; }
+    .btn-ghost { background: var(--surface); color: var(--fg); border: 1px solid var(--border); }
+    .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ─── Stats row ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .stat-card .num { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; }
+    .stat-card .label { font-size: 0.78rem; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+    .stat-card.urgent .num { color: #ef4444; }
+    .stat-card.routine .num { color: #22c55e; }
+    .stat-card.spam .num { color: var(--fg-dim); }
+    .stat-card.total .num { color: var(--accent-bright); }
+
+    /* ─── Filter tabs ─── */
+    .filter-tabs {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-subtle);
+    }
+    .tab-btn {
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: none;
+      color: var(--fg-muted);
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: var(--surface); color: var(--fg); border-color: var(--border); }
+    .tab-btn.active { background: var(--accent-glow); color: var(--accent); border-color: rgba(245,158,11,0.3); }
+
+    /* ─── Email list ─── */
+    .email-list-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .email-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .email-row:hover { background: var(--bg-subtle); }
+    .email-row.unread { background: rgba(245,158,11,0.04); }
+    .email-row.selected { background: rgba(245,158,11,0.09); }
+    .email-badge {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+    }
+    .badge-urgent { background: #ef4444; }
+    .badge-routine { background: #22c55e; }
+    .badge-spam { background: var(--fg-dim); }
+    .badge-pending { background: var(--accent); }
+    .email-meta { flex: 1; min-width: 0; }
+    .email-sender { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .email-subject { font-size: 0.88rem; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .email-time { font-size: 0.78rem; color: var(--fg-dim); white-space: nowrap; margin-top: 2px; }
+    .email-classification {
+      flex-shrink: 0;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cls-urgent { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .cls-routine { background: rgba(34,197,94,0.12); color: #86efac; }
+    .cls-spam { background: rgba(85,85,112,0.3); color: var(--fg-dim); }
+    .cls-pending { background: var(--accent-glow); color: var(--accent); }
+
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+      color: var(--fg-muted);
+    }
+    .empty-state .big { font-size: 2.5rem; margin-bottom: 1rem; }
+
+    /* ─── Email detail panel ─── */
+    .detail-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 480px;
+      background: var(--bg-subtle);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 100;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .detail-close {
+      background: none; border: none; color: var(--fg-muted); font-size: 1.3rem; cursor: pointer; padding: 0;
+    }
+    .detail-close:hover { color: var(--fg); }
+    .detail-subject { font-family: var(--font-display); font-size: 1rem; font-weight: 600; flex: 1; }
+    .detail-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; }
+    .detail-from { font-size: 0.85rem; color: var(--fg-muted); margin-bottom: 0.75rem; }
+    .detail-from strong { color: var(--fg); }
+    .detail-text {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--fg-muted);
+      white-space: pre-wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .draft-box {
+      background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .draft-label {
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem;
+    }
+    .draft-subject { font-size: 0.85rem; color: var(--fg-muted); margin-bottom: 0.5rem; }
+    .draft-content {
+      font-size: 0.88rem; line-height: 1.65; color: var(--fg);
+      white-space: pre-wrap;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .draft-actions { display: flex; gap: 0.5rem; }
+
+    /* ─── Toast ─── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.88rem;
+      color: var(--fg);
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+    .toast.visible { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(34,197,94,0.4); color: #86efac; }
+    .toast.error { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
+    /* ─── Loading spinner ─── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 0; overflow: hidden; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .detail-panel { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="/"><span>Night</span>Owl</a>
+    </div>
+    <a class="nav-item active" onclick="showTab('all')">
+      <span class="nav-icon">📬</span> Inbox
+    </a>
+    <a class="nav-item" href="/" style="margin-top:auto;">
+      <span class="nav-icon">🏠</span> Home
+    </a>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="topbar">
+      <h1>Email Triage</h1>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn btn-ghost btn-sm" id="btn-briefing" onclick="generateBriefing()">☀️ Generate Briefing</button>
+        <button class="btn btn-primary btn-sm" id="btn-demo" onclick="loadDemoEmails()">⚡ Load Demo Emails</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card total"><div class="num" id="stat-total">—</div><div class="label">Total</div></div>
+      <div class="stat-card urgent"><div class="num" id="stat-urgent">—</div><div class="label">Urgent</div></div>
+      <div class="stat-card routine"><div class="num" id="stat-routine">—</div><div class="label">Routine</div></div>
+      <div class="stat-card spam"><div class="num" id="stat-spam">—</div><div class="label">Spam</div></div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="tab-btn" data-filter="urgent" onclick="setFilter('urgent',this)">🔴 Urgent</button>
+      <button class="tab-btn" data-filter="routine" onclick="setFilter('routine',this)">🟢 Routine</button>
+      <button class="tab-btn" data-filter="spam" onclick="setFilter('spam',this)">⚫ Spam</button>
+      <button class="tab-btn" data-filter="pending" onclick="setFilter('pending',this)">⏳ Pending</button>
+    </div>
+
+    <!-- Email list -->
+    <div class="email-list-wrap" id="email-list">
+      <div class="empty-state">
+        <div class="big">📭</div>
+        <p>Loading your inbox...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Email detail panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div class="detail-subject" id="detail-subject">—</div>
+    <span class="email-classification" id="detail-badge">—</span>
+  </div>
+  <div class="detail-body" id="detail-body">
+    <div class="empty-state" style="padding:2rem 0;">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let currentFilter = 'all';
+let selectedEmailId = null;
+
+// ─── Init ───
+document.addEventListener('DOMContentLoaded', () => {
+  loadStats();
+  loadEmails();
+});
+
+// ─── Stats ───
+async function loadStats() {
+  try {
+    const r = await fetch('/api/triage/stats');
+    const { stats } = await r.json();
+    document.getElementById('stat-total').textContent = stats.total || 0;
+    document.getElementById('stat-urgent').textContent = stats.urgent || 0;
+    document.getElementById('stat-routine').textContent = stats.routine || 0;
+    document.getElementById('stat-spam').textContent = stats.spam || 0;
+  } catch(e) { /* ignore */ }
+}
+
+// ─── Email list ───
+async function loadEmails() {
+  const list = document.getElementById('email-list');
+  list.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const params = currentFilter !== 'all' ? `?classification=${currentFilter}` : '';
+    const r = await fetch('/api/triage/emails' + params);
+    const { emails } = await r.json();
+    renderEmailList(emails);
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><p style="color:#ef4444">Failed to load emails. Check API.</p></div>';
+  }
+}
+
+function renderEmailList(emails) {
+  const list = document.getElementById('email-list');
+  if (!emails || emails.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="big">📭</div>
+      <p>No emails here yet.<br>Click <strong>⚡ Load Demo Emails</strong> to see NightOwl in action.</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = emails.map(e => {
+    const cls = e.classification || 'pending';
+    const badgeClass = `cls-${cls}`;
+    const dotClass = `badge-${cls}`;
+    const sender = e.sender_name || e.sender_email;
+    const timeStr = formatTime(e.received_at);
+    const unreadClass = !e.is_read ? 'unread' : '';
+    const hasDraft = e.draft_body ? ' ✏️' : '';
+    return `<div class="email-row ${unreadClass}" onclick="openDetail(${e.id})">
+      <div class="email-badge ${dotClass}"></div>
+      <div class="email-meta">
+        <div class="email-sender">${esc(sender)}${hasDraft}</div>
+        <div class="email-subject">${esc(e.subject)}</div>
+        <div class="email-time">${timeStr}</div>
+      </div>
+      <span class="email-classification ${badgeClass}">${cls}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── Detail panel ───
+async function openDetail(id) {
+  selectedEmailId = id;
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('open');
+  document.getElementById('detail-body').innerHTML = '<div class="empty-state" style="padding:2rem 0;"><div class="spinner"></div></div>';
+
+  try {
+    const r = await fetch(`/api/triage/emails/${id}`);
+    const { email, draft } = await r.json();
+
+    document.getElementById('detail-subject').textContent = email.subject;
+    const cls = email.classification || 'pending';
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = cls.toUpperCase();
+    badge.className = `email-classification cls-${cls}`;
+
+    let draftHTML = '';
+    if (draft) {
+      const approved = draft.approval_status === 'approved';
+      draftHTML = `<div class="draft-box">
+        <div class="draft-label">✏️ AI Draft Response</div>
+        <div class="draft-subject">Subject: ${esc(draft.draft_subject || '')}</div>
+        <div class="draft-content">${esc(draft.draft_body)}</div>
+        <div class="draft-actions">
+          <button class="btn btn-primary btn-sm" onclick="approveDraft(${draft.id})" ${approved ? 'disabled' : ''}>${approved ? '✓ Approved' : 'Approve'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="rejectDraft(${draft.id})" ${approved ? 'disabled' : ''}>Dismiss</button>
+        </div>
+      </div>`;
+    } else if (cls === 'urgent') {
+      draftHTML = `<div class="draft-box">
+        <div class="draft-label" style="color:#fca5a5;">🔴 Urgent — Review Required</div>
+        <p style="font-size:0.88rem;color:var(--fg-muted);margin:0;">This email was flagged as urgent. No auto-draft was generated. You need to respond personally.</p>
+      </div>`;
+    }
+
+    document.getElementById('detail-body').innerHTML = `
+      <div class="detail-from"><strong>${esc(email.sender_name || email.sender_email)}</strong> &lt;${esc(email.sender_email)}&gt;</div>
+      <div class="detail-text">${esc(email.body_text || '(no text content)')}</div>
+      ${draftHTML}
+      ${email.classification_reasoning ? `<p style="font-size:0.8rem;color:var(--fg-dim);margin-top:1rem;">AI reasoning: ${esc(email.classification_reasoning)}</p>` : ''}
+    `;
+
+    // Refresh list to mark as read
+    loadEmails();
+  } catch(e) {
+    document.getElementById('detail-body').innerHTML = `<p style="color:#ef4444;padding:1rem;">Error: ${e.message}</p>`;
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  selectedEmailId = null;
+}
+
+// ─── Draft actions ───
+async function approveDraft(draftId) {
+  try {
+    await fetch(`/api/triage/drafts/${draftId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approvalStatus: 'approved' })
+    });
+    showToast('Draft approved ✓', 'success');
+    if (selectedEmailId) openDetail(selectedEmailId);
+  } catch(e) { showToast('Failed to approve', 'error'); }
+}
+
+async function rejectDraft(draftId) {
+  try {
+    await fetch(`/api/triage/drafts/${draftId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approvalStatus: 'rejected' })
+    });
+    showToast('Draft dismissed', '');
+    if (selectedEmailId) openDetail(selectedEmailId);
+  } catch(e) { showToast('Failed to dismiss', 'error'); }
+}
+
+// ─── Demo emails ───
+async function loadDemoEmails() {
+  const btn = document.getElementById('btn-demo');
+  btn.disabled = true;
+  btn.textContent = '⏳ Processing...';
+  try {
+    const r = await fetch('/api/triage/ingest-demo', { method: 'POST' });
+    const data = await r.json();
+    showToast(`Loaded ${data.processed} demo emails ✓`, 'success');
+    loadStats();
+    loadEmails();
+  } catch(e) {
+    showToast('Failed to load demos', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Load Demo Emails';
+  }
+}
+
+// ─── Briefing ───
+async function generateBriefing() {
+  const btn = document.getElementById('btn-briefing');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  try {
+    const r = await fetch('/api/triage/briefing/generate', { method: 'POST' });
+    const data = await r.json();
+    if (data.briefing) {
+      showToast('Morning briefing generated ✓', 'success');
+      // Show briefing in a new tab/window
+      const win = window.open('', '_blank');
+      win.document.write(data.briefing.html_content);
+      win.document.close();
+    }
+  } catch(e) {
+    showToast('Failed to generate briefing', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '☀️ Generate Briefing';
+  }
+}
+
+// ─── Filter ───
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  closeDetail();
+  loadEmails();
+}
+
+// ─── Helpers ───
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast visible ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+</script>
+<%- analyticsSnippet %>
+</body>
+</html>

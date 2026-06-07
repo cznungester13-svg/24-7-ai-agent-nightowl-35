@@ -1,0 +1,479 @@
+<!-- Contact form modal — triggered by "Get Started" CTA -->
+<div id="contact-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+
+    <div class="modal-header">
+      <div class="section-label">GET STARTED</div>
+      <h2 id="modal-title" class="modal-title">Talk to us<span class="gradient-text">.</span></h2>
+      <p class="modal-sub">We'll be in touch within 24 hours. Or reach us anytime at <a href="mailto:nightowl-ai-35@polsia.app">nightowl-ai-35@polsia.app</a></p>
+    </div>
+
+    <form id="lead-form" class="lead-form" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="lf-name">Name <span class="req">*</span></label>
+          <input type="text" id="lf-name" name="name" placeholder="Jane Smith" required autocomplete="name">
+          <span class="field-error" id="err-name"></span>
+        </div>
+        <div class="form-group">
+          <label for="lf-email">Email <span class="req">*</span></label>
+          <input type="email" id="lf-email" name="email" placeholder="jane@company.com" required autocomplete="email">
+          <span class="field-error" id="err-email"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="lf-business">Business name <span class="optional">optional</span></label>
+        <input type="text" id="lf-business" name="business_name" placeholder="Acme Corp" autocomplete="organization">
+      </div>
+
+      <div class="form-group">
+        <label for="lf-pain">What's your biggest admin headache? <span class="optional">optional</span></label>
+        <textarea id="lf-pain" name="pain_point" placeholder="Invoices piling up, follow-ups slipping, scheduling chaos…" rows="3" maxlength="400"></textarea>
+        <span class="char-count"><span id="pain-count">0</span>/400</span>
+      </div>
+
+      <div class="form-error" id="form-error" style="display:none;"></div>
+
+      <button type="submit" class="cta-btn cta-primary cta-large form-submit" id="lf-submit">
+        Send Message
+      </button>
+    </form>
+
+    <!-- Success state -->
+    <div id="lead-success" class="lead-success" style="display:none;">
+      <div class="success-icon">&#10003;</div>
+      <h3>Message sent.</h3>
+      <p>We'll be in touch within 24 hours.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ─── Contact Form Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(6px);
+}
+
+.modal-box {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem 2rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 60px var(--accent-glow);
+  animation: modal-in 0.2s ease-out;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { color: var(--fg); border-color: var(--fg-dim); }
+
+.modal-header { margin-bottom: 1.75rem; }
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.modal-sub {
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+  line-height: 1.6;
+}
+
+.modal-sub a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.modal-sub a:hover { color: var(--accent-bright); }
+
+/* Form */
+.lead-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.req { color: var(--accent); }
+.optional { color: var(--fg-dim); font-size: 0.75rem; font-weight: 400; }
+
+.form-group input,
+.form-group textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  resize: none;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--fg-dim); }
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-group input.error,
+.form-group textarea.error {
+  border-color: #ef4444;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  min-height: 1rem;
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+  text-align: right;
+  margin-top: 0.2rem;
+}
+
+.form-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  color: #fca5a5;
+}
+
+.form-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Success */
+.lead-success {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+.lead-success h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.lead-success p {
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+}
+
+/* ─── Inline lead section (below pricing) ─── */
+.lead-section {
+  padding: 4rem 2rem 6rem;
+  text-align: center;
+}
+
+.lead-section-inner { max-width: 520px; margin: 0 auto; }
+
+.lead-section h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.lead-section p {
+  color: var(--fg-muted);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.inline-lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inline-lead-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.inline-lead-form input,
+.inline-lead-form textarea {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  resize: none;
+}
+
+.inline-lead-form input::placeholder,
+.inline-lead-form textarea::placeholder { color: var(--fg-dim); }
+
+.inline-lead-form input:focus,
+.inline-lead-form textarea:focus {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.inline-form-error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  min-height: 1.2rem;
+}
+
+.inline-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: #0a0a0f;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 2rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.inline-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+.inline-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.inline-success {
+  display: none;
+  background: var(--surface);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  color: var(--fg);
+}
+
+.inline-success strong { color: #22c55e; }
+
+@media (max-width: 500px) {
+  .form-row { grid-template-columns: 1fr; }
+  .inline-lead-form .form-row { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+(function() {
+  var modal = document.getElementById('contact-modal');
+  var backdrop = modal ? modal.querySelector('.modal-backdrop') : null;
+  var closeBtn = document.getElementById('modal-close');
+  var form = document.getElementById('lead-form');
+  var submitBtn = document.getElementById('lf-submit');
+  var successDiv = document.getElementById('lead-success');
+  var painTA = document.getElementById('lf-pain');
+  var painCount = document.getElementById('pain-count');
+
+  // Open modal
+  document.querySelectorAll('[data-modal="contact"]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      modal.style.display = 'flex';
+      document.getElementById('lf-name').focus();
+    });
+  });
+
+  // Close handlers
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+  closeBtn && closeBtn.addEventListener('click', closeModal);
+  backdrop && backdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+  });
+
+  // Pain point char counter
+  painTA && painTA.addEventListener('input', function() {
+    painCount.textContent = painTA.value.length;
+  });
+
+  function showFieldError(id, msg) {
+    var el = document.getElementById('err-' + id);
+    var input = document.getElementById('lf-' + id);
+    if (el) el.textContent = msg || '';
+    if (input) input.classList.toggle('error', !!msg);
+  }
+
+  function clearErrors() {
+    showFieldError('name', '');
+    showFieldError('email', '');
+    document.getElementById('form-error').style.display = 'none';
+  }
+
+  // Submit
+  form && form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    clearErrors();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    var data = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim(),
+      business_name: form.business_name.value.trim() || undefined,
+      pain_point: form.pain_point.value.trim() || undefined,
+    };
+
+    // Client-side validation
+    var ok = true;
+    if (!data.name) { showFieldError('name', 'Name is required'); ok = false; }
+    if (!data.email || !/@/.test(data.email)) { showFieldError('email', 'Valid email is required'); ok = false; }
+    if (!ok) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+      return;
+    }
+
+    try {
+      var res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      var json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        successDiv.style.display = 'block';
+      } else {
+        var err = document.getElementById('form-error');
+        err.textContent = json.error || 'Something went wrong. Please try again.';
+        err.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+      }
+    } catch {
+      var err = document.getElementById('form-error');
+      err.textContent = 'Network error. Please check your connection and try again.';
+      err.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+    }
+  });
+
+  // Inline section form
+  var inlineForm = document.getElementById('inline-lead-form');
+  var inlineSubmit = document.getElementById('inline-submit');
+  var inlineSuccess = document.getElementById('inline-success');
+
+  inlineForm && inlineSubmit && inlineForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var data = {
+      name: inlineForm.name.value.trim(),
+      email: inlineForm.email.value.trim(),
+      business_name: inlineForm.business_name ? inlineForm.business_name.value.trim() : undefined,
+      pain_point: inlineForm.pain_point ? inlineForm.pain_point.value.trim() : undefined,
+    };
+    inlineSubmit.disabled = true;
+    inlineSubmit.textContent = 'Sending…';
+    try {
+      var res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      var json = await res.json();
+      if (json.success) {
+        inlineForm.style.display = 'none';
+        inlineSuccess.style.display = 'block';
+      } else {
+        inlineSubmit.disabled = false;
+        inlineSubmit.textContent = 'Send Message';
+      }
+    } catch {
+      inlineSubmit.disabled = false;
+      inlineSubmit.textContent = 'Send Message';
+    }
+  });
+})();
+</script>
