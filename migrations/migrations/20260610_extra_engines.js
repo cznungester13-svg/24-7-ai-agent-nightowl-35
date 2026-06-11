@@ -36,4 +36,32 @@ async function down(pool){
   await pool.query('DROP TABLE IF EXISTS subscription_items;');
   await pool.query('DROP TABLE IF EXISTS business_financials;');
 }
-module.exports = {up, down};
+// Advanced Engine Data Helpers
+async function getFinancialsByUserId(userId) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM subscription_items WHERE user_id = $1', [userId]);
+    for (const item of items) {
+      await client.query('
+        INSERT INTO subscription_items (user_id, tool_name, category, monthly_cost, detected_features, is_duplicate, Potential_savings)                                                                                                                                                                                                                                                                                                                                                       
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ', [userId, item.tool_name, item.category, item.monthly_cost, item.detected_features, item.is_duplicate,item.potential_savings]);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROOLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+module.exports =  {
+  pool,
+  insertLead,
+  logPageView,
+  logAnalyticsEvent,
+  // Add these two lines right here:
+  getFinancialsByUserId,
+  saveAuditItems
+};
