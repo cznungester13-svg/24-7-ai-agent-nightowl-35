@@ -15,7 +15,7 @@ app.use(express.json());
 
 // EJS view engine. Templates live in ./views/ (entry point: layout.ejs).
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname,'.'));
+app.set('views', path.join(__dirname, '.'));
 
 // Health check endpoint (required for Render)
 // Note: Does NOT query database to allow Neon auto-suspend
