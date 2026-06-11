@@ -15,7 +15,7 @@ app.use(express.json());
 
 // EJS view engine. Templates live in ./views/ (entry point: layout.ejs).
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '.'));
+app.set('views', __dirname);
 
 // Health check endpoint (required for Render)
 // Note: Does NOT query database to allow Neon auto-suspend
@@ -35,8 +35,8 @@ app.use('/api/leads', require('./routes/leads'));
 app.use('/api', require('./routes/analytics'));
 
 // Landing page
-app.get('/', (_req, res) => {
-  res.render('layout', buildLandingContext());
+app.get('/', (req, res) => {
+  res.render('layout');
 });
 
 // Dashboard (email triage inbox)
