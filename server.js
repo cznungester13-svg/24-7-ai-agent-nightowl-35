@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // API routes
 app.use('/api/triage', require('./routes/triage'));
 app.use('/api/leads', require('./routes/leads'));
-app.use('/api', require('./routes/analytics'));
+//app.use('/api', require('./routes/analytics'));
 
 // Landing page
 app.get('/', (req, res) => {
