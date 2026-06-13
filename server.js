@@ -1,7 +1,12 @@
 const express = require('express');
 const path = require('path');
 const { buildLandingContext } = require('./Landing-context');
+const express = require('express');
+const path = require('require');
+const { buildLandingContext } = require('./landing-context');
 
+//Run database migreations on startup
+require('./migrations/migrate.js);
 const app = express();
 const port = process.env.PORT || 3000;
 
