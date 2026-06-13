@@ -36,7 +36,7 @@ app.use('/api/leads', require('./routes/leads'));
 
 // Landing page
 app.get('/', (req, res) => {
-  res.render('layout');
+  res.render('layout' buildLandingcontext());
 });
 
 // Dashboard (email triage inbox)
