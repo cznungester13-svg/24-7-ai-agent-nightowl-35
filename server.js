@@ -6,7 +6,7 @@ const { buildLandingContext } = require('./Landing-context');
 require('./migrations/migrate.js);
 const app = express();
 const port = process.env.PORT || 3000;
-require('./migrations/migrations/migrate.js');
+require('./migrations/migrate.js');
 
 // Fail fast if DATABASE_URL is missing
 if (!process.env.DATABASE_URL) {
