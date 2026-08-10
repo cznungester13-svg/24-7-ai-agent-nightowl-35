@@ -9,15 +9,58 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 from datetime import datetime, timezone
+from collections import defaultdict
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'nightowl')
+
+class _InMemoryCollection:
+    def __init__(self):
+        self._docs = []
+
+    async def insert_one(self, doc):
+        self._docs.append(doc)
+        return type('InsertResult', (), {'inserted_id': str(uuid.uuid4())})()
+
+    def find(self, *_args, **_kwargs):
+        return _InMemoryCursor(self._docs)
+
+
+class _InMemoryCursor:
+    def __init__(self, docs):
+        self._docs = docs
+
+    async def to_list(self, _length):
+        return list(self._docs)
+
+
+class _InMemoryDatabase:
+    def __init__(self):
+        self.status_checks = _InMemoryCollection()
+
+
+class _InMemoryMongoClient:
+    def __init__(self, *_args, **_kwargs):
+        self._db = _InMemoryDatabase()
+
+    def __getitem__(self, _name):
+        return self._db
+
+    def close(self):
+        return None
+
+
+try:
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+except Exception:
+    client = _InMemoryMongoClient()
+    db = client[db_name]
 
 # Create the main app without a prefix
 app = FastAPI()
