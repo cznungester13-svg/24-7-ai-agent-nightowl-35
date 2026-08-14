@@ -19,19 +19,6 @@ const Home = () => {
 
   useEffect(() => {
     helloWorldApi();
-
-    // Dynamically insert the Chatbot Widget
-    const script = document.createElement("script");
-    script.src = "YOUR_CHATBOT_SCRIPT_URL_HERE"; // <-- Paste your Chatbot script URL here
-    script.async = true;
-    document.body.appendChild(script);
-
-    // Clean up script on unmount
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
   }, []);
 
   return (
