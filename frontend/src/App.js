@@ -33,7 +33,7 @@ const Home = () => {
         >
           <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" alt="logo" />
         </a>
-        <p className="mt-5">Building something incredible ~!</p>
+        <p className="mt-5">NightOwl AI Agent Loading...</p>
       </header>
     </div>
   );
