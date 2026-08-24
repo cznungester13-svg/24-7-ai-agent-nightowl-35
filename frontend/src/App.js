@@ -25,9 +25,7 @@ const Home = () => {
     <div>
       <header className="App-header">
         <a
-          data-testid={HOME.emergentLink}
           className="App-link"
-          href="https://emergent.sh"
           target="_blank"
           rel="noopener noreferrer"
         >
