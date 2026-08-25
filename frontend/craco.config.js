@@ -133,11 +133,7 @@ if (isDevServer) {
   try {
     webpackConfig = withVisualEdits(webpackConfig);
   } catch (err) {
-      console.warn(
-      );
-    } else {
-      throw err;
-    }
+      console.warn(err);
   }
 }
 
